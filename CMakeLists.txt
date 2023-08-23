@@ -8,11 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME ecgm_app)
 
 set(SOURCES
-src/main.cc
-src/renderer.cc
-src/lineplot.cc)
+    ${CMAKE_SOURCE_DIR}/src/renderer.cc
+    ${CMAKE_SOURCE_DIR}/src/lineplot.cc)
 
-add_executable(${TARGET_NAME} ${SOURCES})
+add_executable(${TARGET_NAME} ${SOURCES} ${CMAKE_SOURCE_DIR}/src/main.cc)
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})
@@ -25,3 +24,7 @@ endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
+
+if(${BUILD_WITH_TESTS} STREQUAL "ON")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/tests)   
+endif()
