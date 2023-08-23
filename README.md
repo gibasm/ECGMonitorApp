@@ -6,6 +6,8 @@ desktop app for my ECGMonitor hardware
 
 ## Dependencies
 
+- GNU/Linux machine
+
 - compiler with C++20 support (gcc/clang)
 
 - CMake 3.20
