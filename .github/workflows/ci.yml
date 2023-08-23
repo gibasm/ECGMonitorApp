@@ -1,0 +1,13 @@
+name: CI (GNU/Linux)
+on: [push]
+jobs:
+  jenkins-static-image-pipeline:
+    runs-on: archlinux
+    steps:
+      - uses: actions/checkout@v2
+      - uses:
+          jenkinsci/jfr-static-image-action@master
+        with:
+          command: run
+          jenkinsfile: Jenkinsfile
+          pluginstxt: plugins.txt
