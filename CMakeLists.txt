@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME ecgm_app)
 
 set(SOURCES
+    ${CMAKE_SOURCE_DIR}/ipc_proto/ipc_proto.cc
     ${CMAKE_SOURCE_DIR}/src/renderer.cc
     ${CMAKE_SOURCE_DIR}/src/lineplot.cc)
 
@@ -23,6 +24,8 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC include)
+target_include_directories(${TARGET_NAME} PUBLIC ipc_proto)
+
 target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
 
 if(${BUILD_WITH_TESTS} STREQUAL "ON")
