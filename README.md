@@ -2,6 +2,8 @@
 
 desktop app for my ECGMonitor hardware
 
+![Rough, layered architecture depiction of the app](media/layers.png)
+
 # Building
 
 ## Dependencies
