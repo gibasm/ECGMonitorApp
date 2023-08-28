@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 #include <vector>
-#include <exception>
+#include "ipc.hh"
 
 #define __IPC_PACKET_ATTR__ [[gnu::packed]]
 
@@ -67,27 +67,6 @@ serialize_ipc_packet(const ipc_packet& packet);
 
 ipc_packet 
 deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet);
-
-
-class 
-ipc_exception : public std::exception
-{
-public:
-    explicit 
-    ipc_exception(const char* message)
-        :msg_(message) {}
-
-    virtual 
-    ~ipc_exception() noexcept = default;
-
-    virtual const char* 
-    what() const noexcept override 
-    { 
-        return msg_; 
-    } 
-private:
-    const char* msg_; 
-};
 
 }
 

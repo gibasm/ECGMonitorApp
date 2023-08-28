@@ -2,8 +2,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#define IPC_ASSERT(x, msg) { if(!(x)) throw ipc_exception(msg); }
-
 namespace
 ecgm
 {
