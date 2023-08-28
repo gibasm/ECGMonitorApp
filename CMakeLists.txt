@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME ecgm_app)
 
 set(SOURCES
+    ${CMAKE_SOURCE_DIR}/src/ipc_server.cc
+    ${CMAKE_SOURCE_DIR}/ipc_sockets/ipc_unix_socket.cc
     ${CMAKE_SOURCE_DIR}/ipc_proto/ipc_proto.cc
     ${CMAKE_SOURCE_DIR}/src/renderer.cc
     ${CMAKE_SOURCE_DIR}/src/lineplot.cc)
@@ -25,6 +27,7 @@ endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_include_directories(${TARGET_NAME} PUBLIC ipc_proto)
+target_include_directories(${TARGET_NAME} PUBLIC ipc_sockets)
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
 

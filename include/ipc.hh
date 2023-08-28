@@ -87,6 +87,8 @@ private:
     std::mutex lock_;
 };
 
+typedef ipc_socket_iface* socket_ptr;
+
 }
 
 #endif /* IPC_HH */
