@@ -27,42 +27,13 @@ ipc_server::wait_for_connection()
 void
 ipc_server::send(const ipc_packet& packet)
 {
-    auto serialized = serialize_ipc_packet(packet);
-
-    socket->lock();
-    socket->write((void*)serialized.data(), serialized.size()); 
-    socket->unlock();
+    ipc_send_packet(this->socket, packet);
 }
 
 ipc_packet
 ipc_server::receive()
 {
-    serialized_ipc_packet serialized;
-    serialized.resize(2);
-    
-    size_t bytes_left = sizeof(ipc_any_packet);
-    while(bytes_left != 0U)
-    {
-        socket->lock();
-        bytes_left -= socket->read((void*)serialized.data(), sizeof(ipc_any_packet));
-        socket->unlock();
-    }
-
-    bytes_left = serialized.at(ipc_length_pos) - sizeof(ipc_any_packet);
-    serialized.resize(sizeof(ipc_any_packet) + bytes_left);
-
-    size_t off = sizeof(ipc_any_packet);
-
-    while(bytes_left != 0U)
-    {
-        socket->lock();
-        size_t n = socket->read((void*)(serialized.data() + off), bytes_left);
-        bytes_left -= n;
-        off += n;
-        socket->unlock();
-    }
-
-    return deserialize_ipc_packet(serialized);
+    return ipc_receive_packet(this->socket); 
 }
 
 }

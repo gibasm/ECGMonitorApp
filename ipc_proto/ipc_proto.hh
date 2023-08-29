@@ -68,6 +68,13 @@ serialize_ipc_packet(const ipc_packet& packet);
 ipc_packet 
 deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet);
 
+
+void 
+ipc_send_packet(socket_ptr socket, const ipc_packet& packet);
+
+ipc_packet
+ipc_receive_packet(socket_ptr socket);
+
 }
 
 #endif /* IPC_PROTO_HH */
