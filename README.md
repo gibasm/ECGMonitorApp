@@ -1,5 +1,7 @@
 # ECG Monitor App
 
+[![GNU/Linux CI badge](https://github.com/mbedded-mike/ECGMonitorApp/actions/workflows/ci_linux.yml/badge.svg)](https://github.com/mbedded-mike/ECGMonitorApp/actions/workflows/ci_linux.yml)
+
 desktop app for my ECGMonitor hardware
 
 ![Rough, layered architecture depiction of the app](media/layers.png)
