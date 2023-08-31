@@ -11,6 +11,8 @@ ipc_server::ipc_server(socket_ptr socket)
 {
     socket->lock();
 
+    this->socket->init_server();
+
     this->socket->allow_connections(max_allowed_connections);
 
     socket->unlock();

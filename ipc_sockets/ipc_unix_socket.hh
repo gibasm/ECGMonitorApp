@@ -19,6 +19,9 @@ public:
     ~ipc_unix_socket();
 
     virtual void
+    init_server() override;
+
+    virtual void
     connect() override;
 
     virtual void 
@@ -37,6 +40,7 @@ private:
     int sockfd;
     sockaddr_un addr;
     const char* name;
+    bool bind_called;
 };
 
 }

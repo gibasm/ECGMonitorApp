@@ -13,6 +13,7 @@ class
 mock_socket :public ecgm::ipc_socket_iface
 {
 public:
+    MOCK_METHOD(void, init_server, (), (override));
     MOCK_METHOD(void, connect, (), (override));
     MOCK_METHOD(void, allow_connections, (size_t), (override));
     MOCK_METHOD(void, accept_connection, (), (override));

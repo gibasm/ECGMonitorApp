@@ -9,7 +9,7 @@ ecgm
 {
 
 ipc_unix_socket::ipc_unix_socket(const char* name)
-:name(name) 
+:name(name), bind_called(false)
 {
     sockfd = ::socket(AF_UNIX, SOCK_STREAM, 0);
     IPC_SOCKET_ASSERT(sockfd != -1, "Cannot create a unix domain socket");
@@ -17,14 +17,24 @@ ipc_unix_socket::ipc_unix_socket(const char* name)
     memset(&addr, 0, sizeof(addr));
 
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, name, sizeof(addr.sun_path) - 1);
-    IPC_SOCKET_ASSERT(::bind(sockfd, (const struct sockaddr*) &addr, sizeof(addr)) != -1, "Failed to bind the socket to the name");
+    strncpy(addr.sun_path, name, sizeof(addr.sun_path) - 1);    
 }
 
 ipc_unix_socket::~ipc_unix_socket()
 {
-    close(sockfd);
-    unlink(name);
+    ::close(sockfd);
+
+    /* if bind was called it might be a good idea to unlink */
+    if(bind_called)
+        ::unlink(name);
+}
+
+void
+ipc_unix_socket::init_server()
+{
+    IPC_SOCKET_ASSERT(::unlink(name) != -1, "Failed to unlink socket");
+    IPC_SOCKET_ASSERT(::bind(sockfd, (const struct sockaddr*) &addr, sizeof(addr)) != -1, "Failed to bind the socket to the name");
+    bind_called = true;
 }
 
 void 

@@ -50,6 +50,9 @@ class
 ipc_socket_iface
 {
 public:
+    /* used by the server socket to some necessary initialization */
+    virtual void
+    init_server() = 0;
 
     /* used by the client socket to connect */
     virtual void
