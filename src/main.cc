@@ -39,11 +39,7 @@ main(void)
         .window_height = initial_height
     }; 
 
-    ecgm::render_context main_plot_context = {
-        .renderer = &ecgm::renderer,
-        .xoff = 20, .yoff = 200,
-        .width = 1020, .height = 360
-    };
+    ecgm::render_context main_plot_context(&ecgm::renderer, 1020, 360, 20, 200);
 
     ecgm::lineplot<std::vector<float>::iterator> plot(
             test_series.begin(), 
@@ -53,7 +49,7 @@ main(void)
     render_targets.push_back(&plot); 
 
     std::jthread renderer_thread(ecgm::renderer_thread_start, &renderer_args);
-      
+
     renderer_thread.join(); 
 
     return EXIT_SUCCESS;

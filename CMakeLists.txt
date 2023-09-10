@@ -12,6 +12,7 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}/ipc_sockets/ipc_unix_socket.cc
     ${CMAKE_SOURCE_DIR}/ipc_proto/ipc_proto.cc
     ${CMAKE_SOURCE_DIR}/src/renderer.cc
+    ${CMAKE_SOURCE_DIR}/src/render_context.cc
     ${CMAKE_SOURCE_DIR}/src/lineplot.cc)
 
 add_executable(${TARGET_NAME} ${SOURCES} ${CMAKE_SOURCE_DIR}/src/main.cc)
@@ -34,3 +35,5 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
 if(${BUILD_WITH_TESTS} STREQUAL "ON")
     add_subdirectory(${CMAKE_SOURCE_DIR}/tests)   
 endif()
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/services)
