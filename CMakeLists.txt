@@ -32,8 +32,6 @@ target_include_directories(${TARGET_NAME} PUBLIC ipc_sockets)
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
 
-if(${BUILD_WITH_TESTS} STREQUAL "ON")
+if(${BUILD_WITH_TESTS}) 
     add_subdirectory(${CMAKE_SOURCE_DIR}/tests)   
 endif()
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/services)
