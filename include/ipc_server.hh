@@ -1,6 +1,7 @@
 #ifndef IPC_SERVER_HH
 #define IPC_SERVER_HH 
 
+#include <mutex>
 #include "ipc.hh"
 #include "ipc_proto.hh"
 
@@ -14,7 +15,7 @@ class
 ipc_server
 {
 public:
-    ipc_server(socket_ptr socket);
+    ipc_server(ipc_server_socket_iface* socket);
 
     virtual
     ~ipc_server() = default;
@@ -27,8 +28,13 @@ public:
 
     ipc_packet
     receive();
+
 private:
-    socket_ptr socket;
+    std::mutex lock;    
+    ipc_server_socket_iface* socket;
+    socket_ptr client;
+
+    serialized_ipc_packet recvbuf;
 };
 
 }

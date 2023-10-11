@@ -2,7 +2,6 @@
 #define IPC_HH
 
 #include <exception>
-#include <mutex>
 #include <stddef.h>
 
 namespace
@@ -50,47 +49,48 @@ class
 ipc_socket_iface
 {
 public:
-    /* used by the server socket to some necessary initialization */
-    virtual void
-    init_server() = 0;
-
-    /* used by the client socket to connect */
-    virtual void
-    connect() = 0;
-
-    /* set the number 'no' of allowed connections in the queue */
+    /* @brief Send (blocking). 
+     * @param data pointer to data to be send
+     * @param size size of the mentioned data */
     virtual void 
-    allow_connections(size_t no) = 0; 
-   
-    /* accept the first connection in the queue or wait until one's requested */
-    virtual void
-    accept_connection() = 0;
-
-    /* write data to the socket */
-    virtual void 
-    write(void* data, size_t size) = 0;
+    send(void* data, size_t size) = 0;
     
-    /* read the data of max 'size' bytes from the socket and return the actual number of read bytes */
+    /* @brief Receive (blocking).
+     * @param buf pointer to the receive buffer
+     * @param size size of the buffer 
+     * @return size_t retuns the size of the received data
+     *
+     * If received data size is larger than 
+     * the buffer size an exception is thrown. */
     virtual size_t
-    read(void* buf, size_t size) = 0;
-    
-    inline void
-    lock()
-    {
-        this->lock_.lock();
-    }
-
-    inline void
-    unlock()
-    {
-        this->lock_.unlock();
-    }
-
-private:
-    std::mutex lock_;
+    receive(void* buf, size_t size) = 0;
 };
 
 typedef ipc_socket_iface* socket_ptr;
+
+class
+ipc_server_socket_iface : ipc_socket_iface
+{
+public:
+    /* @brief Accept next pending connection from the client (blocking).
+     * @return pointer to the client socket */
+    virtual socket_ptr
+    accept_connection() = 0; 
+
+    /* @brief Start listening for connections (nonblocking). */
+    virtual void
+    listen() = 0;
+};
+
+class 
+ipc_client_socket_iface : ipc_socket_iface
+{
+public:
+    /* @breif Connect to the previously specified socket
+     * @return pointer to the server socket */
+    virtual void 
+    connect() = 0;  
+};
 
 }
 

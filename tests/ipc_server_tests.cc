@@ -10,20 +10,37 @@ using ::testing::AtLeast;
 using ::testing::Invoke;
 
 class 
-mock_socket :public ecgm::ipc_socket_iface
+mock_server_socket :public ecgm::ipc_server_socket_iface
 {
 public:
-    MOCK_METHOD(void, init_server, (), (override));
+    MOCK_METHOD(void, send, (void*, size_t), (override));
+    MOCK_METHOD(size_t, receive, (void*, size_t), (override));
+    MOCK_METHOD(void, listen, (), (override));
+    MOCK_METHOD(ecgm::socket_ptr, accept_connection, (), (override));
+};
+
+class
+mock_client_socket :public ecgm::ipc_client_socket_iface
+{
+    MOCK_METHOD(void, send, (void*, size_t), (override));
+    MOCK_METHOD(size_t, receive, (void*, size_t), (override));
     MOCK_METHOD(void, connect, (), (override));
-    MOCK_METHOD(void, allow_connections, (size_t), (override));
-    MOCK_METHOD(void, accept_connection, (), (override));
-    MOCK_METHOD(void, write, (void*, size_t), (override));
-    MOCK_METHOD(size_t, read, (void*, size_t), (override));
 };
 
 class 
 ipc_server_tests :public ::testing::Test
 {};
+
+TEST_F(ipc_server_tests, should_call_listen_and_accept_connection_when_wait_for_connection_called)
+{
+    auto socket = NiceMock<mock_server_socket>();
+    ecgm::ipc_server server(&socket);
+
+    EXPECT_CALL(socket, listen);
+    EXPECT_CALL(socket, accept_connection());
+
+    server.wait_for_connection();
+}
 
 static constexpr ecgm::ipc_packet sample_packet = {
     .any = {
@@ -32,31 +49,3 @@ static constexpr ecgm::ipc_packet sample_packet = {
     }
 };
 
-TEST_F(ipc_server_tests, ipc_server_should_call_socket_write_when_sending_packet)
-{
-    auto socket = NiceMock<mock_socket>();
-    ecgm::ipc_server server(&socket);  
-
-    EXPECT_CALL(socket, write(_, sizeof(ecgm::ipc_any_packet)));
-
-    EXPECT_NO_THROW(server.send(sample_packet));
-}
-
-TEST_F(ipc_server_tests, ipc_server_should_receive_and_deserialize_incoming_packet)
-{
-    auto socket = NiceMock<mock_socket>();
-    ecgm::ipc_server server(&socket); 
-
-    ecgm::serialized_ipc_packet incoming = ecgm::serialize_ipc_packet(sample_packet);
-
-    EXPECT_CALL(socket, read(_,_))
-        .WillRepeatedly(
-        Invoke([&] (void* data, size_t size) -> size_t
-        {
-            memcpy(data, (void*)incoming.data(), sizeof(ecgm::ipc_any_packet)); 
-            return sizeof(ecgm::ipc_any_packet);
-        }
-    ));
-
-    EXPECT_NO_THROW(server.receive());
-}

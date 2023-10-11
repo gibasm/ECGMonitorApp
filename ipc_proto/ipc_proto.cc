@@ -68,45 +68,4 @@ deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet)
     return packet;
 }
 
-void 
-ipc_send_packet(socket_ptr socket, const ipc_packet& packet)
-{    
-    auto serialized = serialize_ipc_packet(packet);
-
-    socket->lock();
-    socket->write((void*)serialized.data(), serialized.size()); 
-    socket->unlock();
-}
-
-ipc_packet
-ipc_receive_packet(socket_ptr socket)
-{
-    serialized_ipc_packet serialized;
-    serialized.resize(2);
-    
-    size_t bytes_left = sizeof(ipc_any_packet);
-    while(bytes_left != 0U)
-    {
-        socket->lock();
-        bytes_left -= socket->read((void*)serialized.data(), sizeof(ipc_any_packet));
-        socket->unlock();
-    }
-
-    bytes_left = serialized.at(ipc_length_pos) - sizeof(ipc_any_packet);
-    serialized.resize(sizeof(ipc_any_packet) + bytes_left);
-
-    size_t off = sizeof(ipc_any_packet);
-
-    while(bytes_left != 0U)
-    {
-        socket->lock();
-        size_t n = socket->read((void*)(serialized.data() + off), bytes_left);
-        bytes_left -= n;
-        off += n;
-        socket->unlock();
-    }
-
-    return deserialize_ipc_packet(serialized);
-}
-
 }

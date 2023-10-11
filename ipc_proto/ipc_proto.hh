@@ -60,6 +60,9 @@ union __IPC_PACKET_ATTR__ ipc_packet
 constexpr size_t ipc_type_pos   = 0UL;
 constexpr size_t ipc_length_pos = 1UL; 
 
+constexpr size_t ipc_max_packet_length = sizeof(ipc_packet);
+constexpr size_t ipc_min_packet_length = sizeof(ipc_any_packet);
+
 typedef std::vector<uint8_t> serialized_ipc_packet;
 
 serialized_ipc_packet 
@@ -67,13 +70,6 @@ serialize_ipc_packet(const ipc_packet& packet);
 
 ipc_packet 
 deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet);
-
-
-void 
-ipc_send_packet(socket_ptr socket, const ipc_packet& packet);
-
-ipc_packet
-ipc_receive_packet(socket_ptr socket);
 
 }
 
