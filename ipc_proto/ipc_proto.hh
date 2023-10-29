@@ -22,6 +22,7 @@ ipc_packet_type
     SET_SCLKDIV             = 0x01U, 
     START                   = 0x03U,
     STOP                    = 0x04U,
+    ACK                     = 0x05U,
 /* error packets */
     INVALID_PACKET_TYPE     = ipc_packet_error_bit | 0x00U,
     INVALID_SCLKDIV         = ipc_packet_error_bit | 0x01U,
@@ -70,6 +71,8 @@ serialize_ipc_packet(const ipc_packet& packet);
 
 ipc_packet 
 deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet);
+
+#define IPC_PACKET_ERROR_BIT_SET(packet) (((packet).any.type & ipc_packet_error_bit) != 0)
 
 }
 

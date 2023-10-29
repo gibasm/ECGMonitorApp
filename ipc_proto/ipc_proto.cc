@@ -46,6 +46,7 @@ deserialize_ipc_packet(const serialized_ipc_packet& serialized_packet)
 
         case ipc_packet_type::START:
         case ipc_packet_type::STOP:
+        case ipc_packet_type::ACK:
         case ipc_packet_type::INVALID_PACKET_TYPE:
         case ipc_packet_type::INVALID_SCLKDIV:
         case ipc_packet_type::LEADS_OFF:
