@@ -1,0 +1,28 @@
+#include "receiver.hh"
+#include "app_globl_state.hh"
+#include "log.hh"
+
+namespace
+ecgm
+{
+
+void
+receiver_thread_start(receiver_thread_args_t* args)
+{
+    log_debug("Receiver is running...");
+    while(!app_state.should_terminate)
+    {
+        try 
+        {
+            auto packet = args->client->receive();
+            args->recvbuf->push(packet);
+        }
+        catch(const ipc_socket_exception& exception) 
+        {
+            log_error("Error while receiving a packet: %s", 
+                    exception.what()); 
+        }
+    } 
+}
+
+}
