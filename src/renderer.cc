@@ -3,6 +3,7 @@
 #include <SDL2/SDL_render.h>
 #include <cstdio>
 #include <SDL2/SDL.h>
+#include "app_globl_state.hh"
 
 namespace
 ecgm
@@ -13,10 +14,11 @@ SDL_Renderer* renderer;
 void 
 renderer_thread_start(renderer_args_t* args)
 {
-    bool quit = false;
     SDL_Event event;
  
     SDL_Init(SDL_INIT_VIDEO);
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");   
  
     SDL_Window* window = SDL_CreateWindow(
         args->window_title,
@@ -26,7 +28,7 @@ renderer_thread_start(renderer_args_t* args)
         args->window_height, 
         SDL_WINDOW_ALLOW_HIGHDPI
     );
-   
+
     if(window == NULL)
     {
         printf("%s\n", SDL_GetError());
@@ -43,14 +45,14 @@ renderer_thread_start(renderer_args_t* args)
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    while (!quit)
+    while (!app_state.should_terminate)
     {
-        SDL_WaitEvent(&event);
+        SDL_PollEvent(&event);
  
         switch (event.type)
         {
             case SDL_QUIT:
-                quit = true;
+                app_state.should_terminate = true; 
                 break;
         }
 

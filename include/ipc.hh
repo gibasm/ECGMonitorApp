@@ -8,7 +8,7 @@ namespace
 ecgm
 {
 
-constexpr const char* APP_IPC_SERVER_NAME = "/tmp/ecgm.frontend.socket";
+constexpr const char* APP_DEFAULT_IPC_SERVER_NAME = "/tmp/ecgmd.socket";
 
 class 
 ipc_exception : public std::exception

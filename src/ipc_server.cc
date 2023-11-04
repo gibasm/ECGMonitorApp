@@ -1,6 +1,7 @@
 #include "ipc_server.hh" 
 #include "ipc_proto.hh"
-#include "ipc_unix_socket.hh"
+#include <cstring>
+#include "log.hh"
 
 namespace
 ecgm
@@ -35,12 +36,14 @@ ipc_server::send(const ipc_packet& packet)
     
     this->lock.lock();
     this->client->send((void*)serialized.data(), serialized.size());
+    log_debug("Sending: %02x %02x", packet.any.type, packet.any.length);
     this->lock.unlock();
 }
 
 ipc_packet
 ipc_server::receive()
 {
+    memset(recvbuf.data(), 0, ipc_max_packet_length);
     uint8_t* recvptr = recvbuf.data();
 
     this->lock.lock();
@@ -53,6 +56,8 @@ ipc_server::receive()
 
     IPC_ASSERT(ret == ipc_min_packet_length, 
         "Malformed packet arrived");
+
+    log_debug("Received: %02x %02x", *recvptr, *(recvptr + 1));
 
     this->lock.lock();
 
