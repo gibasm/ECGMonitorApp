@@ -111,7 +111,7 @@ ipc_unix_client_socket::ipc_unix_client_socket(const char* name)
 }
 
 ipc_unix_client_socket::ipc_unix_client_socket(int fd)
-:fd(fd), name(NULL)
+:fd(fd), name(NULL), addr({})
 {
 }
 

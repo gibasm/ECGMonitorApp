@@ -58,8 +58,9 @@ main(int argc, char** argv)
     float sample;
     while(!feof(f))
     {
-        fscanf(f, "%f", &sample);
-        samples.push_back(sample);
+        if(fscanf(f, "%f", &sample) != EOF) { 
+            samples.push_back(sample);
+        }
     }
 
     fclose(f);
