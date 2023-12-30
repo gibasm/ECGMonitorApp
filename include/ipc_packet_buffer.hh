@@ -25,6 +25,9 @@ public:
     void
     push(ipc_packet packet);
 
+    bool
+    empty() const;
+
 private:
     std::queue<ipc_packet> queue;
     std::counting_semaphore<INT_MAX> sem;

@@ -33,4 +33,10 @@ ipc_packet_buffer::push(ipc_packet packet)
     this->sem.release();
 }
 
+bool 
+ipc_packet_buffer::empty() const
+{
+    return this->queue.empty();
+}
+
 }
