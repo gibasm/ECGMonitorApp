@@ -1,4 +1,5 @@
 #include "ipc_server.hh" 
+#include "ipc.hh"
 #include "ipc_proto.hh"
 #include <cstring>
 #include "log.hh"
@@ -33,11 +34,9 @@ void
 ipc_server::send(const ipc_packet& packet)
 {
     auto serialized = serialize_ipc_packet(packet);
-    
-    this->lock.lock();
+   
     this->client->send((void*)serialized.data(), serialized.size());
     log_debug("Sending: %02x %02x", packet.any.type, packet.any.length);
-    this->lock.unlock();
 }
 
 ipc_packet
@@ -45,27 +44,19 @@ ipc_server::receive()
 {
     memset(recvbuf.data(), 0, ipc_max_packet_length);
     uint8_t* recvptr = recvbuf.data();
-
-    this->lock.lock();
     
     size_t ret = this->client->receive(
         (void*)recvptr, ipc_min_packet_length
     );
-
-    this->lock.unlock();
 
     IPC_ASSERT(ret == ipc_min_packet_length, 
         "Malformed packet arrived");
 
     log_debug("Received: %02x %02x", *recvptr, *(recvptr + 1));
 
-    this->lock.lock();
-
     recvptr += ipc_min_packet_length;
 
     size_t length = recvbuf[ipc_length_pos];
-
-    this->lock.unlock();
 
     IPC_ASSERT(length <= ipc_max_packet_length,
         "Malformed packet arrived");
@@ -75,12 +66,8 @@ ipc_server::receive()
     if(length == 0)
         goto recv_ret;
 
-    this->lock.lock();
-
     ret = this->client->receive((void*) recvptr, length);
 
-    this->lock.unlock();
-    
     IPC_ASSERT(ret == length,  
         "Malformed packet arrived");
 
