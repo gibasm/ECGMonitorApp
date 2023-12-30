@@ -2,6 +2,7 @@
 #define LINEPLOT_HH
 
 #include <iterator>
+#include <vector>
 #include <atomic>
 #include <memory>
 #include <type_traits>
@@ -29,6 +30,12 @@ public:
     virtual void
     notify(void*) override;
 
+    void 
+    set_xticks(int xtick);
+
+    void
+    set_yticks(int ytick);
+
 private:
     std::unique_ptr<SDL_Point[]> points;
     size_t n_points;
@@ -38,9 +45,8 @@ private:
     render_context* context;
 
     int ybase, ydev, xstep;
-    
-    std::atomic_bool needs_full_coord_recalc;
-    std::atomic_bool needs_point_recalc;
+
+    std::mutex notify_lock;    
     size_t point_idx;
 
     void
@@ -53,6 +59,8 @@ private:
     recalculate_plot_coords();
 
     it_t series_begin, series_end;
+
+    std::vector<SDL_Point> xticks = {}, yticks = {};
 };
 
 }
