@@ -92,6 +92,13 @@ public:
     connect() = 0;  
 };
 
+enum
+ipc_model_type
+{
+    IPC_SERVER = 0,
+    IPC_CLIENT = 1,
+};
+
 }
 
 #endif /* IPC_HH */

@@ -7,15 +7,16 @@ ecgm
 {
 
 void
-receiver_thread_start(receiver_thread_args_t* args)
+receiver_thread_start(receiver_thread_args_t args)
 {
     log_debug("Receiver is running...");
     while(!app_state.should_terminate)
     {
         try 
         {
-            auto packet = args->client->receive();
-            args->recvbuf->push(packet);
+            auto packet = args.type == IPC_CLIENT ? args.model.client->receive() :
+                args.model.server->receive();
+            args.recvbuf->push(packet);
         }
         catch(const ipc_socket_exception& exception) 
         {

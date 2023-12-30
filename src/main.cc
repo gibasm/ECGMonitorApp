@@ -8,9 +8,8 @@
 #include "ipc.hh"
 #include "controller.hh"
 #include "app_globl_state.hh"
-#include "receiver.hh"
-#include "sender.hh"
 #include "ipc_unix_socket.hh"
+#include "ipc_stack.hh"
 
 #include "log.hh"
 #include "arg_parser.hh"
@@ -77,13 +76,12 @@ main(int argc, char** argv)
 
 #ifdef __unix__
     ipc_unix_client_socket socket(socket_name);
-#elif __WIN32
-    //TODO: WinSock implementation
+#elif defined(__WIN32)
+    //TODO: implement sockets using WinSock
     #error "Windows sockets are not implemented yet"
 #else 
     #error "Supported platforms: GNU/Linux, Windows"
 #endif 
-
     ipc_client client(&socket);
 
     log_status("Trying to connect to a ecgmd service...");
@@ -114,18 +112,9 @@ main(int argc, char** argv)
         .window_height = initial_height
     }; 
 
-    receiver_thread_args_t receiver_args = {
-        .recvbuf = &recvbuf,
-        .client = &client
-    };
-
-    sender_thread_args_t sender_args = {
-        .sendbuf = &sendbuf,
-        .client = &client
-    };
-
-    log_debug("Initializing render context...");
+    log_debug("Initializing render contexts...");
     render_context main_plot_context(&renderer, 1020, 360, 20, 200);
+    render_context text_context(&renderer, 1020, 360, 20, 200);
     log_debug("Done.");
    
     log_debug("Preparing ECG plot render target..."); 
@@ -133,6 +122,8 @@ main(int argc, char** argv)
             samples.begin(), 
             samples.end(), 
             &main_plot_context);
+    plot.set_xticks(360);
+    plot.set_yticks(50);
 
     render_targets.push_back(&plot); 
     log_debug("Done.");
@@ -141,13 +132,7 @@ main(int argc, char** argv)
     std::jthread renderer_thread(renderer_thread_start, &renderer_args);
     log_debug("Done.");
 
-    log_debug("Starting receiver thread...");
-    std::jthread receiver_thread(receiver_thread_start, &receiver_args);
-    log_debug("Done.");
-
-    log_debug("Starting sender thread...");
-    std::jthread sender_thread(sender_thread_start, &sender_args);
-    log_debug("Done.");
+    ipc_stack_run(&sendbuf, &recvbuf, &client, ipc_model_type::IPC_CLIENT);
 
     controller main_controller(&plot, samples, sendbuf, recvbuf);
 
