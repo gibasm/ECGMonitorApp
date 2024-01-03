@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME ecgm_app)
 
 set(SOURCES
+    ${CMAKE_SOURCE_DIR}/src/file_writer.cc
     ${CMAKE_SOURCE_DIR}/src/ipc_stack.cc
     ${CMAKE_SOURCE_DIR}/src/arg_parser.cc
     ${CMAKE_SOURCE_DIR}/src/ipc_client.cc

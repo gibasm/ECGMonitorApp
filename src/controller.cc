@@ -19,8 +19,8 @@ constexpr static const char* IPC_PROTO_ERROR_STR_LUT[] =
 #define IPC_PROTO_LOOKUP_ERROR_STR(ptype) \
     (IPC_PROTO_ERROR_STR_LUT[ptype & (~ipc_packet_error_bit)])
 
-controller::controller(observer* plot, std::vector<float>& samples, ipc_packet_buffer& sendbuf, ipc_packet_buffer& recvbuf)
-:state(controller::state_t::IDLE), plot(plot), samples(samples), sendbuf(sendbuf), recvbuf(recvbuf)
+controller::controller(observer** observers, size_t n_observers, std::vector<float>& samples, ipc_packet_buffer& sendbuf, ipc_packet_buffer& recvbuf)
+:state(controller::state_t::IDLE), observers(observers), n_observers(n_observers), samples(samples), sendbuf(sendbuf), recvbuf(recvbuf)
 {
 } 
 
@@ -104,7 +104,11 @@ controller::process_incoming_packets()
         {
             int idx = packet.sample.sample_no % this->samples.size();
             this->samples.at(idx) = packet.sample.value; 
-            this->plot->notify(&idx);
+            for(size_t i = 0; i < n_observers; ++i)
+            {
+                if(this->observers[i] != nullptr)
+                    this->observers[i]->notify(&idx);
+            }
             break;
         }
         default:

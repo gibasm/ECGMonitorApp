@@ -12,7 +12,7 @@ class
 controller
 {
 public:
-    controller(observer* plot, std::vector<float>& samples, ipc_packet_buffer& sendbuf, ipc_packet_buffer& recvbuf); 
+    controller(observer** observers, size_t n_observers, std::vector<float>& samples, ipc_packet_buffer& sendbuf, ipc_packet_buffer& recvbuf); 
     
     virtual
     ~controller() = default;
@@ -49,7 +49,8 @@ private:
     };
 
     state_t state;
-    observer* plot;
+    observer** observers;
+    size_t n_observers;
     std::vector<float>& samples;
     ipc_packet_buffer& sendbuf;
     ipc_packet_buffer& recvbuf;
