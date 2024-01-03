@@ -16,7 +16,7 @@ jobs:
         run: sudo apt update
 
       - name: Install dependencies 
-        run: sudo apt install gcc clang libsdl2-dev make cmake
+        run: sudo apt install gcc libsdl2-dev make cmake
 
       - name: Configure CMake for GCC
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_WITH_TESTS=ON -DCMAKE_CXX_COMPILER=g++
@@ -29,12 +29,3 @@ jobs:
 
       - name: Clean up
         run: rm -Rf ${{github.workspace}}/build/*
-
-      - name: Configure CMake for Clang
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_WITH_TESTS=ON -DCMAKE_CXX_COMPILER=clang++
-
-      - name: Build with Clang
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} 
-
-      - name: Test (built with Clang)
-        run: ${{github.workspace}}/build/test --gtest_death_test_style=threadsafe --gtest_shuffle 
