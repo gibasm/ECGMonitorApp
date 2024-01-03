@@ -1,5 +1,5 @@
 #include "lineplot.hh"
-#include <SDL_render.h>
+#include <SDL2/SDL.h>
 #include <memory>
 #include <vector>
 #include <iterator>
