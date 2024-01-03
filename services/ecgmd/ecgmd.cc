@@ -1,13 +1,14 @@
-#include "hw_proto.hh"
 #include "ipc_proto.hh"
 #include "ipc_server.hh"
 #include "ipc_unix_socket.hh"
 #include "ipc.hh"
 #include "log.hh"
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <stdexcept>
+#include <sys/stat.h>
 #include <thread>
 #include "arg_parser.hh"
 #include "serial.hh"
@@ -63,18 +64,22 @@ __serial_recv(uint8_t* data, size_t len);
 int 
 wait_for_device();
 
+static void
+maitain_connection();
+
+static std::atomic_bool dev_connected = false;
+
 int 
 main(int argc, char** argv)
 {               
     if(parse_args(argc, argv) != EXIT_SUCCESS)
         return EXIT_FAILURE;
 
+    std::jthread maintainer(maitain_connection);
+    maintainer.detach();
+
     while(true)
     {
-        log_status("Trying to connect to the device...");
-        if(wait_for_device() != EXIT_SUCCESS)
-            return EXIT_FAILURE;
-        log_status("Device connected."); 
 
         try
         {
@@ -90,6 +95,7 @@ main(int argc, char** argv)
                 .recv = __serial_recv,
                 .rxbuf = &ipc_recvbuf,
                 .txbuf = &ipc_sendbuf,
+                .dev_connected = &dev_connected
             };
 
             comm_controller controller(ctx);
@@ -165,20 +171,43 @@ __serial_recv(uint8_t* data, size_t len)
     return serial_recv(serial_dev, data, len);
 }
 
-int
-wait_for_device()
-{ 
-    if(conn_type != connection_t::WIRED)
-        return EXIT_FAILURE;
+static void 
+maitain_connection()
+{
+    while(!app_state.should_terminate)
+    {
+        dev_connected = false;
+        log_status("Waiting for device to connect ...");
+        struct stat s;
 
-    try
-    {
-        serial_dev = serial_open(dev_path);   
-        return EXIT_SUCCESS;
-    } 
-    catch(std::runtime_error& error)
-    {
-        log_error("%s", error.what());
-        return EXIT_FAILURE;
+        while(stat(dev_path, &s) == -1) 
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        if(!S_ISCHR(s.st_mode))
+        {
+            log_warning("Incompatible device type! Looking for character device!");
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        }
+
+        try
+        {
+            serial_dev = serial_open(dev_path);   
+            dev_connected = true;
+            log_status("Device %s connected.", dev_path);
+        }
+        catch(std::runtime_error& error)
+        {
+            log_error("Error opening device %s: %s", dev_path, error.what());
+            dev_connected = false;
+        } 
+
+        while(stat(dev_path, &s) != -1)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
+        log_status("Device disconnected");
     }
 }

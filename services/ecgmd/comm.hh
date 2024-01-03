@@ -15,6 +15,7 @@ typedef struct
     void (*send)(uint8_t*, size_t);
     size_t (*recv)(uint8_t*, size_t);
     ecgm::ipc_packet_buffer* rxbuf, *txbuf; 
+    std::atomic_bool* dev_connected;
 } comm_context;
 
 class

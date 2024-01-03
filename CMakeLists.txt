@@ -28,10 +28,8 @@ add_executable(${TARGET_NAME} ${SOURCES} ${CMAKE_SOURCE_DIR}/src/main.cc)
 
 include(FindPkgConfig)
 
-pkg_search_module(SDL2TTF REQUIRED SDL2_ttf >= 2.0.0)
-
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2TTF_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIR}) 
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     target_compile_options(${TARGET_NAME} PRIVATE -Werror -Wall -Wextra -pedantic -fdiagnostics-color=always)
@@ -43,7 +41,7 @@ target_include_directories(${TARGET_NAME} PUBLIC include)
 target_include_directories(${TARGET_NAME} PUBLIC ipc_proto)
 target_include_directories(${TARGET_NAME} PUBLIC ipc_sockets)
 
-target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES} ${SDL2TTF_LIBRARIES})
+target_link_libraries(${TARGET_NAME} PRIVATE ${SDL2_LIBRARIES})
 
 if(${BUILD_WITH_TESTS}) 
     add_subdirectory(${CMAKE_SOURCE_DIR}/tests)   

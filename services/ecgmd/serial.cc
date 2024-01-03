@@ -85,6 +85,13 @@ serial_close(void* device)
     }
 }
 
+bool
+is_open(void* device)
+{
+    serial_dev_t* dev = (serial_dev_t*) device;
+    return fcntl(dev->fd, F_GETFD) != -1 || errno != EBADF; 
+}
+
 #elif __defined(__WIN32)    
     // TODO: add Windows support
     #error "(WIP)"

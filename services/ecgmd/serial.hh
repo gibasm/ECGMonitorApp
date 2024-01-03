@@ -20,6 +20,9 @@ serial_recv(void* device, uint8_t* data, size_t len);
 void 
 serial_close(void* device);
 
+bool
+is_open(void* device);
+
 }
 
 #endif /* SERIAL_HH */

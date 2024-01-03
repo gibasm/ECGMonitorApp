@@ -36,11 +36,16 @@ comm_controller::read_samples()
 {
     while(!app_state.should_terminate)
     {
-        if(ctx.recv((sample_buffer + wpos), 1) != 1)
+        if(!*ctx.dev_connected)
             continue;
 
-        wpos = (wpos  + 1) % 1024;
-        sem_post(&sbuf_sem);
+        size_t ret = ctx.recv((sample_buffer + wpos), 1);
+
+        if(ret == 1) 
+        {
+            wpos = (wpos  + 1) % 1024;
+            sem_post(&sbuf_sem);
+        }
     }
 }
 
@@ -64,14 +69,19 @@ comm_controller::process_incoming_ipc()
             {
                 log_debug("Start received, starting..."); 
 
-                ipc_packet ack = {
-                    .any = {
-                        .type = ipc_packet_type::ACK,
-                        .length = sizeof(ipc_any_packet)
-                    }
-                };
+                ipc_packet ipc_pack;
+                ipc_pack.any.length = sizeof(ipc_any_packet);
 
-                ctx.txbuf->push(ack);
+                if(*ctx.dev_connected)
+                {
+                    ipc_pack.any.type = ipc_packet_type::ACK;
+                }
+                else
+                {
+                    ipc_pack.any.type = ipc_packet_type::DEVICE_NOT_CONNECTED;
+                }
+
+                ctx.txbuf->push(ipc_pack);
 
                 this->state = RUNNING;  
             } 
@@ -84,14 +94,19 @@ comm_controller::process_incoming_ipc()
             {
                 log_debug("Stop received, stopping..."); 
 
-                ipc_packet ack = {
-                    .any = {
-                        .type = ipc_packet_type::ACK,
-                        .length = sizeof(ipc_any_packet)
-                    }
-                };
+                ipc_packet ipc_pack;
+                ipc_pack.any.length = sizeof(ipc_any_packet);
 
-                ctx.txbuf->push(ack);
+                if(*ctx.dev_connected)
+                {
+                    ipc_pack.any.type = ipc_packet_type::ACK;
+                }
+                else
+                {
+                    ipc_pack.any.type = ipc_packet_type::DEVICE_NOT_CONNECTED;
+                }
+
+                ctx.txbuf->push(ipc_pack);
 
                 this->state = IDLE;
             }
@@ -105,6 +120,8 @@ void
 comm_controller::forward_samples()
 {
     if(state != RUNNING)
+        return;
+    if(!*ctx.dev_connected)
         return;
 
     static uint32_t sample_no = 0;
