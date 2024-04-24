@@ -72,56 +72,63 @@ static std::atomic_bool dev_connected = false;
 int 
 main(int argc, char** argv)
 {               
-    if(parse_args(argc, argv) != EXIT_SUCCESS)
-        return EXIT_FAILURE;
-
-    std::jthread maintainer(maitain_connection);
-    maintainer.detach();
-
-    while(true)
+    try
     {
+        if(parse_args(argc, argv) != EXIT_SUCCESS)
+            return EXIT_FAILURE;
 
-        try
+        std::jthread maintainer(maitain_connection);
+        maintainer.detach();
+
+        while(true)
         {
-            ipc_unix_server_socket socket(ipc_socket_name);
-            ipc_server server(&socket);
 
-            log_status("Waiting for the frontend to connect...");
-            server.wait_for_connection();
-            log_status("Connected.");
+            try
+            {
+                ipc_unix_server_socket socket(ipc_socket_name);
+                ipc_server server(&socket);
 
-            comm_context ctx = {
-                .send = __serial_send,
-                .recv = __serial_recv,
-                .rxbuf = &ipc_recvbuf,
-                .txbuf = &ipc_sendbuf,
-                .dev_connected = &dev_connected
-            };
+                log_status("Waiting for the frontend to connect...");
+                server.wait_for_connection();
+                log_status("Connected.");
 
-            comm_controller controller(ctx);
+                comm_context ctx = {
+                    .send = __serial_send,
+                    .recv = __serial_recv,
+                    .rxbuf = &ipc_recvbuf,
+                    .txbuf = &ipc_sendbuf,
+                    .dev_connected = &dev_connected
+                };
 
-            ipc_stack_run(&ipc_sendbuf, &ipc_recvbuf, &server, ipc_model_type::IPC_SERVER);
+                comm_controller controller(ctx);
 
-            while(!app_state.should_terminate)
-            {                       
-                controller.run(); 
+                ipc_stack_run(&ipc_sendbuf, &ipc_recvbuf, &server, ipc_model_type::IPC_SERVER);
+
+                while(!app_state.should_terminate)
+                {                       
+                    controller.run(); 
+                }
+            } 
+            catch(ipc_exception& e)
+            {
+                log_error("%s", e.what());
+                serial_close(serial_dev);
+                return EXIT_FAILURE;
             }
-        } 
-        catch(ipc_exception& e)
-        {
-            log_error("%s", e.what());
-            serial_close(serial_dev);
-            return EXIT_FAILURE;
-        }
-        catch(...)
-        {
-            log_error("Unexpected exception caught, exiting...");
-            serial_close(serial_dev);
-            return EXIT_FAILURE;
-        }
+            catch(...)
+            {
+                log_error("Unexpected exception caught, exiting...");
+                serial_close(serial_dev);
+                return EXIT_FAILURE;
+            }
 
 
-    } /* while */
+        } /* while */
+    } catch(...) {
+        // fail silently
+        log_debug("Unexpected exception caught");
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
